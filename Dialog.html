@@ -1,0 +1,594 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <base target="_top">
+  <style>
+    body{font-family:'Segoe UI',Roboto,Arial,sans-serif;margin:0;background:#f8f9fa;color:#202124}
+    *{box-sizing:border-box}
+  input,textarea,select{user-select:text;-webkit-user-select:text}
+    .header{background:#1a73e8;color:#fff;padding:13px 20px;display:flex;justify-content:space-between;align-items:center;box-shadow:0 2px 4px rgba(0,0,0,.12)}
+    .header h3{margin:0;font-size:16px}.header button{background:rgba(255,255,255,.18);color:#fff;border:0;padding:6px 12px;border-radius:5px;cursor:pointer}
+    .container{padding:20px}.screen{display:none}.screen.active{display:block}
+    .card{background:#fff;border:1px solid #dadce0;border-radius:9px;padding:22px;max-width:520px;margin:15px auto;box-shadow:0 1px 3px rgba(0,0,0,.08)}
+    .role-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin:15px 0}
+    .role-btn{padding:17px;border:2px solid #dadce0;border-radius:9px;background:#fff;cursor:pointer;font-weight:700;font-size:15px}
+    .role-btn.active{border-color:#1a73e8;background:#e8f0fe;color:#1a73e8}
+    .auth-tabs{display:flex;border-bottom:2px solid #dadce0;margin-bottom:15px}
+    .auth-tab{flex:1;padding:9px;border:0;background:none;font-weight:700;color:#5f6368;cursor:pointer;border-bottom:3px solid transparent}
+    .auth-tab.active{color:#1a73e8;border-bottom-color:#1a73e8}
+    .form-group{margin-bottom:13px}.form-group label{display:block;font-weight:600;font-size:12px;color:#5f6368;margin-bottom:4px}
+    input,select,textarea{width:100%;padding:9px;border:1px solid #dadce0;border-radius:5px;font-size:13px}
+    textarea{min-height:70px;resize:vertical}
+    .btn{width:100%;padding:10px;border:0;border-radius:5px;background:#1a73e8;color:#fff;font-weight:700;cursor:pointer}
+    .btn.green{background:#34a853}.btn.purple{background:#8e24aa}.btn.gray{background:#e0e0e0;color:#333}.btn.small{width:auto;padding:7px 11px;font-size:12px}
+    .btn:disabled{opacity:.6;cursor:not-allowed}
+    .toolbar{display:flex;justify-content:space-between;align-items:center;gap:10px;margin-bottom:14px}
+    .class-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:14px}.class-box{width:100%;background:#fff;border:2px solid #e8eaed;border-radius:8px;padding:22px;text-align:center;cursor:pointer;font:inherit;font-size:16px;font-weight:700;color:#1a73e8}
+    .class-box:hover{border-color:#1a73e8;background:#e8f0fe}
+    .tabs{display:flex;border-bottom:2px solid #dadce0;margin-bottom:15px;overflow:auto}
+    .tab{padding:9px 14px;border:0;background:none;font-weight:700;color:#5f6368;cursor:pointer;border-bottom:3px solid transparent;white-space:nowrap}
+    .tab.active{color:#1a73e8;border-bottom-color:#1a73e8}
+    .content{display:none}.content.active{display:block}
+    .list{max-height:420px;overflow:auto}.item{background:#fff;border:1px solid #dadce0;border-radius:7px;padding:12px 14px;margin-bottom:8px}
+    .item-head{display:flex;justify-content:space-between;gap:10px;align-items:flex-start}.muted{color:#5f6368;font-size:11px}
+    .status{display:inline-block;padding:4px 8px;border-radius:13px;font-size:11px;font-weight:700}.done{background:#e6f4ea;color:#137333}.todo{background:#fce8e6;color:#c5221f}
+    .actions{display:flex;gap:6px;flex-wrap:wrap}.icon{border:1px solid #dadce0;background:#f1f3f4;border-radius:4px;padding:6px 9px;cursor:pointer}
+    .student-list{max-height:190px;overflow:auto;border:1px solid #dadce0;border-radius:5px;padding:8px;background:#fff}
+    .student-row{display:flex;align-items:center;gap:8px;padding:5px}.student-row input{width:auto}
+    .modal{display:none;position:fixed;inset:0;background:rgba(0,0,0,.48);z-index:1000;align-items:center;justify-content:center;padding:15px}
+    .modal.active{display:flex}.modal-box{background:#fff;border-radius:9px;width:95%;max-width:760px;max-height:92vh;overflow:auto;padding:20px}
+    .modal-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:13px}.close{font-size:22px;cursor:pointer}
+    table{width:100%;border-collapse:collapse;font-size:12px}th,td{border:1px solid #dadce0;padding:6px;text-align:center}th{background:#f1f3f4}
+    .msg{padding:9px;border-radius:5px;font-size:12px;margin-top:10px;display:none}.error{background:#fce8e6;color:#c5221f}.success{background:#e6f4ea;color:#137333}
+    .info-box{padding:10px;background:#f1f3f4;border-radius:6px;font-size:12px;margin-bottom:12px}
+    @media(max-width:650px){.class-grid,.role-grid{grid-template-columns:1fr}.toolbar{align-items:flex-start;flex-direction:column}.item-head{flex-direction:column}}
+  </style>
+</head>
+<body>
+  <div class="header">
+    <h3>📚 Huiswerk & Toetsen App</h3>
+    <div id="userBar" style="display:none">
+      <span id="userText" style="font-size:12px;margin-right:8px"></span>
+      <button onclick="logout()">Uitloggen</button>
+    </div>
+  </div>
+
+  <div class="container">
+    <!-- LOGIN -->
+    <div id="loginScreen" class="screen active">
+      <div class="card">
+        <h2 style="margin-top:0">Welkom</h2>
+        <div class="info-box">Kies eerst of je als <b>leerling</b> of <b>docent</b> wilt inloggen.</div>
+        <div class="role-grid">
+          <button id="roleStudent" class="role-btn" onclick="selectRole('student')">🎓 Leerling</button>
+          <button id="roleTeacher" class="role-btn" onclick="selectRole('teacher')">👨‍🏫 Docent</button>
+        </div>
+
+        <div id="authArea" style="display:none">
+          <div class="auth-tabs">
+            <button id="loginTab" class="auth-tab active" onclick="switchAuth('login')">Inloggen</button>
+            <button id="registerTab" class="auth-tab" onclick="switchAuth('register')">Account aanmaken</button>
+          </div>
+
+          <form id="loginForm">
+            <div class="form-group"><label>Gebruikersnaam</label><input id="loginUser" required></div>
+            <div class="form-group"><label>Wachtwoord</label><input id="loginPass" type="password" required></div>
+            <button class="btn" id="loginBtn">Inloggen</button>
+          </form>
+
+          <form id="registerForm" style="display:none">
+            <div class="form-group"><label>Gebruikersnaam</label><input id="regUser" required></div>
+            <div class="form-group"><label>Volledige naam</label><input id="regName" required></div>
+            <div class="form-group"><label>Wachtwoord</label><input id="regPass" type="password" required></div>
+            <div class="form-group"><label>Herhaal wachtwoord</label><input id="regPass2" type="password" required></div>
+            <button class="btn green" id="regBtn">Account aanmaken</button>
+          </form>
+          <div id="authMsg" class="msg"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- TEACHER CLASS SELECT -->
+    <div id="teacherClassesScreen" class="screen">
+      <div class="toolbar">
+        <h2 style="margin:0">🏫 Mijn klassen</h2>
+        <button class="btn green small" onclick="openClassModal()">➕ Nieuwe klas</button>
+      </div>
+      <div id="classGrid" class="class-grid">Laden...</div>
+    </div>
+
+    <!-- TEACHER CLASS WORKSPACE -->
+    <div id="teacherWorkspace" class="screen">
+      <div class="toolbar">
+        <h2 id="classTitle" style="margin:0;color:#1a73e8"></h2>
+        <button class="btn gray small" onclick="loadTeacherClasses()">← Andere klas</button>
+      </div>
+      <div class="tabs">
+        <button class="tab active" onclick="teacherTab('homework',this)">📝 Huiswerk opgeven</button>
+        <button class="tab" onclick="teacherTab('status',this)">📋 Huiswerkstatus</button>
+        <button class="tab" onclick="teacherTab('tests',this)">📊 Toetsen & cijfers</button>
+      </div>
+
+      <div id="teacherHomework" class="content active">
+        <form id="homeworkForm">
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
+            <div class="form-group"><label>Vak</label><input id="hwSubject" required></div>
+            <div class="form-group"><label>Inleverdatum</label><input id="hwDue" type="date" required></div>
+          </div>
+          <div class="form-group"><label>Omschrijving</label><textarea id="hwDescription" required></textarea></div>
+          <div class="form-group">
+            <label>Leerlingen van deze klas</label>
+            <div style="margin:5px 0;font-size:11px">
+              <span style="color:#1a73e8;cursor:pointer" onclick="selectAllClassStudents(true)">Alles selecteren</span>
+              &nbsp;|&nbsp;
+              <span style="color:#5f6368;cursor:pointer" onclick="selectAllClassStudents(false)">Niets selecteren</span>
+            </div>
+            <div id="classStudents" class="student-list">Laden...</div>
+          </div>
+          <button class="btn" id="saveHwBtn">Huiswerk opslaan</button>
+        </form>
+        <div id="hwMsg" class="msg"></div>
+      </div>
+
+      <div id="teacherStatus" class="content">
+        <div id="homeworkStatusList" class="list">Laden...</div>
+      </div>
+
+      <div id="teacherTests" class="content">
+        <div class="toolbar">
+          <h3 style="margin:0;color:#8e24aa">Toetsen van deze klas</h3>
+          <button class="btn purple small" onclick="openTestModal()">➕ Nieuwe toets</button>
+        </div>
+        <div id="teacherTestsList" class="list">Laden...</div>
+      </div>
+    </div>
+
+    <!-- STUDENT DASHBOARD -->
+    <div id="studentDashboard" class="screen">
+      <div class="toolbar">
+        <div>
+          <h2 style="margin:0">🎓 Mijn overzicht</h2>
+          <div class="muted">Huiswerk, toetsen en cijfers</div>
+        </div>
+        <button class="btn gray small" onclick="loadStudentDashboard()">↻ Vernieuwen</button>
+      </div>
+      <div class="tabs">
+        <button class="tab active" onclick="studentTab('studentHomework',this)">📝 Mijn huiswerk</button>
+        <button class="tab" onclick="studentTab('studentTests',this)">📊 Mijn toetscijfers</button>
+      </div>
+      <div id="studentHomework" class="content active"><div id="studentHomeworkList" class="list">Laden...</div></div>
+      <div id="studentTests" class="content"><div id="studentTestsList" class="list">Laden...</div></div>
+    </div>
+  </div>
+
+  <!-- CLASS MODAL -->
+  <div id="classModal" class="modal">
+    <div class="modal-box" style="max-width:520px">
+      <div class="modal-head"><h3 style="margin:0">🏫 Nieuwe klas</h3><span class="close" onclick="closeModal('classModal')">&times;</span></div>
+      <form id="classForm">
+        <div class="form-group"><label>Naam van de klas</label><input id="newClassName" placeholder="bijv. Havo 4A" required></div>
+        <div class="form-group">
+          <label>Kies de leden van de klas</label>
+          <div class="muted" style="margin-bottom:6px">Alleen aangemaakte leerlingaccounts verschijnen hier.</div>
+          <div id="allStudents" class="student-list">Leerlingen laden...</div>
+        </div>
+        <button class="btn green" id="createClassBtn">Klas aanmaken</button>
+      </form>
+      <div id="classMsg" class="msg"></div>
+    </div>
+  </div>
+
+  <!-- HOMEWORK EDIT MODAL -->
+  <div id="editHwModal" class="modal">
+    <div class="modal-box" style="max-width:430px">
+      <div class="modal-head"><h3 style="margin:0">✏️ Huiswerk aanpassen</h3><span class="close" onclick="closeModal('editHwModal')">&times;</span></div>
+      <form id="editHwForm">
+        <input type="hidden" id="editHwId">
+        <div class="form-group"><label>Vak</label><input id="editSubject" required></div>
+        <div class="form-group"><label>Inleverdatum</label><input id="editDue" type="date" required></div>
+        <div class="form-group"><label>Omschrijving</label><textarea id="editDescription" required></textarea></div>
+        <button class="btn">Wijzigingen opslaan</button>
+      </form>
+      <div id="editMsg" class="msg"></div>
+    </div>
+  </div>
+
+  <!-- TEST MODAL -->
+  <div id="testModal" class="modal">
+    <div class="modal-box">
+      <div class="modal-head"><h3 id="testModalTitle" style="margin:0;color:#8e24aa">📊 Nieuwe toets</h3><span class="close" onclick="closeModal('testModal')">&times;</span></div>
+      <form id="testForm">
+        <input type="hidden" id="testId">
+        <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px">
+          <div class="form-group"><label>Toetsnaam</label><input id="testName" required></div>
+          <div class="form-group"><label>Vak</label><input id="testSubject" required></div>
+          <div class="form-group"><label>Toetsdatum</label><input id="testDate" type="date" required></div>
+        </div>
+
+        <h4 style="color:#8e24aa">❓ Vragen</h4>
+        <div style="overflow:auto">
+          <table><thead><tr><th>Label</th><th>Type</th><th>Max punten</th><th></th></tr></thead><tbody id="questionsBody"></tbody></table>
+        </div>
+        <button type="button" class="btn purple small" style="margin-top:8px" onclick="addQuestion()">+ Vraag</button>
+
+        <h4 style="color:#8e24aa">💯 Punten per leerling</h4>
+        <div style="overflow:auto"><table><thead id="scoreHead"></thead><tbody id="scoreBody"></tbody></table></div>
+
+        <h4 style="color:#8e24aa">🔐 Toestemming om de toets in te zien</h4>
+        <div class="info-box">Vink leerlingen aan die na het nakijken de inhoud van de toets mogen bekijken.</div>
+        <div id="permissionStudents" class="student-list"></div>
+
+        <div style="display:flex;gap:8px;margin-top:15px">
+          <button class="btn purple" id="saveTestBtn">Toets opslaan</button>
+          <button type="button" class="btn gray" onclick="closeModal('testModal')">Annuleren</button>
+        </div>
+      </form>
+      <div id="testMsg" class="msg"></div>
+    </div>
+  </div>
+
+  <!-- STUDENT TEST VIEW MODAL -->
+  <div id="viewTestModal" class="modal">
+    <div class="modal-box" style="max-width:700px">
+      <div class="modal-head"><h3 id="viewTestTitle" style="margin:0;color:#8e24aa"></h3><span class="close" onclick="closeModal('viewTestModal')">&times;</span></div>
+      <div id="viewTestContent"></div>
+    </div>
+  </div>
+
+<script>
+let token = null;
+let role = null;
+let username = null;
+let displayName = null;
+let activeClass = null;
+let classStudents = [];
+let allStudents = [];
+let currentHomework = {};
+let currentTests = {};
+let questions = [];
+
+window.onload = function(){
+  const d = new Date(); d.setDate(d.getDate()+1);
+  document.getElementById('hwDue').value = d.toISOString().slice(0,10);
+  document.getElementById('testDate').value = new Date().toISOString().slice(0,10);
+};
+
+function selectRole(r){
+  role=r;
+  document.getElementById('roleStudent').classList.toggle('active',r==='student');
+  document.getElementById('roleTeacher').classList.toggle('active',r==='teacher');
+  document.getElementById('authArea').style.display='block';
+  switchAuth('login');
+}
+
+function switchAuth(mode){
+  document.getElementById('loginTab').classList.toggle('active',mode==='login');
+  document.getElementById('registerTab').classList.toggle('active',mode==='register');
+  document.getElementById('loginForm').style.display=mode==='login'?'block':'none';
+  document.getElementById('registerForm').style.display=mode==='register'?'block':'none';
+  hideMsg('authMsg');
+}
+
+function showScreen(id){
+  document.querySelectorAll('.screen').forEach(x=>x.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+}
+
+function showMsg(id,text,ok){
+  const el=document.getElementById(id); el.className='msg '+(ok?'success':'error'); el.innerText=text; el.style.display='block';
+}
+function hideMsg(id){document.getElementById(id).style.display='none'}
+function closeModal(id){document.getElementById(id).classList.remove('active')}
+
+document.getElementById('loginForm').addEventListener('submit',function(e){
+  e.preventDefault();
+  if(!role){showMsg('authMsg','Kies eerst een rol.',false);return}
+  const btn=document.getElementById('loginBtn'); btn.disabled=true; btn.innerText='Controleren...';
+  google.script.run.withSuccessHandler(function(res){
+    btn.disabled=false; btn.innerText='Inloggen';
+    if(!res.success){showMsg('authMsg',res.message,false);return}
+    token=res.token; username=res.username; displayName=res.name;
+    document.getElementById('userBar').style.display='block';
+    document.getElementById('userText').innerText=(role==='teacher'?'👨‍🏫 ':'🎓 ')+displayName;
+    if(role==='teacher') loadTeacherClasses(); else loadStudentDashboard();
+  }).loginAccount(role,document.getElementById('loginUser').value,document.getElementById('loginPass').value);
+});
+
+document.getElementById('registerForm').addEventListener('submit',function(e){
+  e.preventDefault();
+  if(document.getElementById('regPass').value!==document.getElementById('regPass2').value){
+    showMsg('authMsg','Wachtwoorden komen niet overeen.',false);return;
+  }
+  const btn=document.getElementById('regBtn'); btn.disabled=true; btn.innerText='Aanmaken...';
+  google.script.run.withSuccessHandler(function(res){
+    btn.disabled=false; btn.innerText='Account aanmaken';
+    showMsg('authMsg',res.message,res.success);
+    if(res.success){
+      const createdUser=document.getElementById('regUser').value;
+      document.getElementById('registerForm').reset();
+      document.getElementById('loginUser').value=createdUser;
+      document.getElementById('loginPass').value='';
+      switchAuth('login');
+    }
+  }).registerAccount(role,document.getElementById('regUser').value,document.getElementById('regPass').value,document.getElementById('regName').value);
+});
+
+function logout(){
+  if(token) google.script.run.logoutAccount(token);
+  token=null; role=null; username=null; displayName=null; activeClass=null;
+  document.getElementById('userBar').style.display='none';
+  document.getElementById('loginForm').reset(); document.getElementById('registerForm').reset();
+  document.getElementById('authArea').style.display='none';
+  document.getElementById('roleStudent').classList.remove('active');
+  document.getElementById('roleTeacher').classList.remove('active');
+  showScreen('loginScreen');
+}
+
+/* ===== DOCENT KLASSEN ===== */
+function loadTeacherClasses(){
+  showScreen('teacherClassesScreen');
+  const grid=document.getElementById('classGrid'); grid.innerHTML='Laden...';
+  google.script.run
+    .withSuccessHandler(function(list){
+      list=list||[];
+      if(!list.length){grid.innerHTML='<div class="info-box" style="grid-column:1/-1">Je hebt nog geen klassen. Maak hierboven een nieuwe klas aan.</div>';return}
+      grid.innerHTML=list.map((c,i)=>`<button type="button" class="class-box" data-class-index="${i}">🏫 ${escapeHtml(c)}</button>`).join('');
+      grid.querySelectorAll('[data-class-index]').forEach(btn=>{
+        btn.addEventListener('click',()=>selectClass(list[Number(btn.dataset.classIndex)],btn));
+      });
+    })
+    .withFailureHandler(function(err){
+      grid.innerHTML='<div class="msg error" style="display:block;grid-column:1/-1">Klassen laden mislukt: '+escapeHtml(err&&err.message?err.message:err)+'</div>';
+    })
+    .getClasses(token);
+}
+
+function openClassModal(){
+  document.getElementById('newClassName').value='';
+  hideMsg('classMsg');
+  document.getElementById('classModal').classList.add('active');
+  google.script.run.withSuccessHandler(function(students){
+    allStudents=students||[];
+    const box=document.getElementById('allStudents');
+    box.innerHTML=allStudents.length ? allStudents.map((s,i)=>`
+      <label class="student-row"><input type="checkbox" class="new-class-student" value="${escapeHtml(s.username)}" id="newst${i}">
+      <span>${escapeHtml(s.name)} <span class="muted">(${escapeHtml(s.username)})</span></span></label>`).join('') :
+      '<em class="muted">Er zijn nog geen leerlingaccounts. Laat leerlingen eerst een account aanmaken.</em>';
+  }).getStudentAccounts(token);
+}
+
+document.getElementById('classForm').addEventListener('submit',function(e){
+  e.preventDefault();
+  const btn=document.getElementById('createClassBtn');btn.disabled=true;btn.innerText='Aanmaken...';
+  const students=[...document.querySelectorAll('.new-class-student:checked')].map(x=>x.value);
+  google.script.run.withSuccessHandler(function(res){
+    btn.disabled=false;btn.innerText='Klas aanmaken';
+    if(res.success){closeModal('classModal');loadTeacherClasses()}else showMsg('classMsg',res.message,false);
+  }).addClass(token,document.getElementById('newClassName').value,students);
+});
+
+function selectClass(c,button){
+  const requested=String(c||'').trim();
+  if(!requested)return;
+
+  const oldText=button?button.innerText:'';
+  if(button){button.disabled=true;button.innerText='Klas openen...'}
+
+  google.script.run
+    .withSuccessHandler(function(res){
+      if(button){button.disabled=false;button.innerText=oldText}
+      if(!res||!res.success){
+        alert(res&&res.message?res.message:'Klas openen mislukt.');
+        return;
+      }
+      activeClass=res.className;
+      classStudents=res.students||[];
+      document.getElementById('classTitle').innerText='🏫 '+activeClass;
+      renderClassStudents();
+      showScreen('teacherWorkspace');
+      loadTeacherHomework();
+      loadTeacherTests();
+    })
+    .withFailureHandler(function(err){
+      if(button){button.disabled=false;button.innerText=oldText}
+      alert('Klas openen mislukt: '+(err&&err.message?err.message:err));
+    })
+    .openClass(token,requested);
+}
+
+function renderClassStudents(){
+  document.getElementById('classStudents').innerHTML=classStudents.length?
+    classStudents.map(s=>`<label class="student-row"><input type="checkbox" class="hw-student" value="${escapeHtml(s.username)}" checked><span>${escapeHtml(s.name)}</span></label>`).join(''):
+    '<em class="muted">Deze klas heeft nog geen leerlingen.</em>';
+  renderPermissionStudents();
+}
+
+function loadClassStudents(){
+  document.getElementById('classStudents').innerHTML='Laden...';
+  google.script.run
+    .withSuccessHandler(function(list){
+      classStudents=list||[];
+      renderClassStudents();
+    })
+    .withFailureHandler(function(err){
+      document.getElementById('classStudents').innerHTML='<span class="muted">Leerlingen laden mislukt: '+escapeHtml(err&&err.message?err.message:err)+'</span>';
+    })
+    .getStudentsInClass(token,activeClass);
+}
+function selectAllClassStudents(v){document.querySelectorAll('.hw-student').forEach(x=>x.checked=v)}
+
+document.getElementById('homeworkForm').addEventListener('submit',function(e){
+  e.preventDefault();
+  const btn=document.getElementById('saveHwBtn');btn.disabled=true;btn.innerText='Opslaan...';hideMsg('hwMsg');
+  const students=[...document.querySelectorAll('.hw-student:checked')].map(x=>x.value);
+  google.script.run.withSuccessHandler(function(res){
+    btn.disabled=false;btn.innerText='Huiswerk opslaan';
+    showMsg('hwMsg',res.message,res.success);
+    if(res.success){document.getElementById('hwDescription').value='';loadTeacherHomework()}
+  }).saveHomeworkForClass(token,{selectedClass:activeClass,subject:document.getElementById('hwSubject').value,description:document.getElementById('hwDescription').value,dueDate:document.getElementById('hwDue').value,students:students});
+});
+
+function teacherTab(which,btn){
+  document.querySelectorAll('#teacherWorkspace .tab').forEach(x=>x.classList.remove('active'));btn.classList.add('active');
+  ['teacherHomework','teacherStatus','teacherTests'].forEach(id=>document.getElementById(id).classList.remove('active'));
+  document.getElementById('teacher'+which.charAt(0).toUpperCase()+which.slice(1)).classList.add('active');
+  if(which==='status')loadTeacherHomework(); if(which==='tests')loadTeacherTests();
+}
+
+function loadTeacherHomework(){
+  google.script.run.withSuccessHandler(function(items){
+    currentHomework={};const box=document.getElementById('homeworkStatusList');
+    items=items||[];
+    if(!items.length){box.innerHTML='<div class="info-box">Geen huiswerk voor deze klas.</div>';return}
+    box.innerHTML=items.map((item,i)=>{
+      currentHomework[item.id]=item;
+      const done=item.status==='Af';
+      return `<div class="item"><div class="item-head"><div><b>👤 ${escapeHtml(item.leerling)}</b><br>📘 <b>${escapeHtml(item.vak)}</b> — ${escapeHtml(item.omschrijving)}<br><span class="muted">Inleveren: ${escapeHtml(item.inleverdatum)}</span></div>
+      <div class="actions"><button type="button" class="status ${done?'done':'todo'}" data-hw-toggle="${i}">${done?'✔ Af':'✖ Niet af'}</button><button type="button" class="icon" data-hw-edit="${i}">✏️</button><button type="button" class="icon" data-hw-delete="${i}">🗑️</button></div></div></div>`;
+    }).join('');
+    box.querySelectorAll('[data-hw-toggle]').forEach(btn=>btn.addEventListener('click',()=>{const x=items[Number(btn.dataset.hwToggle)];toggleHw(x.id,x.status)}));
+    box.querySelectorAll('[data-hw-edit]').forEach(btn=>btn.addEventListener('click',()=>openEditHw(items[Number(btn.dataset.hwEdit)].id)));
+    box.querySelectorAll('[data-hw-delete]').forEach(btn=>btn.addEventListener('click',()=>deleteHw(items[Number(btn.dataset.hwDelete)].id)));
+  }).getClassHomework(token,activeClass);
+}
+
+function toggleHw(id,status){google.script.run.withSuccessHandler(function(res){if(res.success)loadTeacherHomework();else alert(res.message)}).toggleHomeworkStatus(token,id,status)}
+function deleteHw(id){if(!confirm('Dit huiswerk verwijderen?'))return;google.script.run.withSuccessHandler(function(res){if(res.success)loadTeacherHomework();else alert(res.message)}).deleteHomework(token,id)}
+function openEditHw(id){
+  const x=currentHomework[id];if(!x)return;
+  document.getElementById('editHwId').value=x.id;document.getElementById('editSubject').value=x.vak;document.getElementById('editDue').value=x.inleverdatumRaw;document.getElementById('editDescription').value=x.omschrijving;hideMsg('editMsg');document.getElementById('editHwModal').classList.add('active');
+}
+document.getElementById('editHwForm').addEventListener('submit',function(e){
+  e.preventDefault();google.script.run.withSuccessHandler(function(res){if(res.success){closeModal('editHwModal');loadTeacherHomework()}else showMsg('editMsg',res.message,false)}).updateHomework(token,document.getElementById('editHwId').value,document.getElementById('editSubject').value,document.getElementById('editDescription').value,document.getElementById('editDue').value);
+});
+
+/* ===== TOETSEN ===== */
+function loadTeacherTests(){
+  google.script.run.withSuccessHandler(function(items){
+    currentTests={};const box=document.getElementById('teacherTestsList');
+    items=items||[];
+    if(!items.length){box.innerHTML='<div class="info-box">Geen toetsen voor deze klas.</div>';return}
+    box.innerHTML=items.map((t,i)=>{
+      currentTests[t.id]=t;const max=(t.questions||[]).reduce((s,q)=>s+Number(q.maxPoints||0),0);
+      return `<div class="item"><div class="item-head"><div><b style="color:#8e24aa">📝 ${escapeHtml(t.testName)}</b> (${escapeHtml(t.subject)})<br><span class="muted">Datum: ${escapeHtml(t.testDate)} · ${t.questions.length} vragen · max ${max}p</span></div><div class="actions"><button type="button" class="icon" data-test-edit="${i}">✏️ Bekijken/bewerken</button><button type="button" class="icon" data-test-delete="${i}">🗑️</button></div></div></div>`;
+    }).join('');
+    box.querySelectorAll('[data-test-edit]').forEach(btn=>btn.addEventListener('click',()=>openTestModal(items[Number(btn.dataset.testEdit)].id)));
+    box.querySelectorAll('[data-test-delete]').forEach(btn=>btn.addEventListener('click',()=>deleteTest(items[Number(btn.dataset.testDelete)].id)));
+  }).getClassTests(token,activeClass);
+}
+
+function openTestModal(id){
+  hideMsg('testMsg');document.getElementById('testModal').classList.add('active');questions=[];
+  const t=id?currentTests[id]:null;
+  document.getElementById('testModalTitle').innerText=t?'✏️ Toets bewerken':'📊 Nieuwe toets';
+  document.getElementById('testId').value=t?t.id:'';
+  document.getElementById('testName').value=t?t.testName:'';
+  document.getElementById('testSubject').value=t?t.subject:'';
+  document.getElementById('testDate').value=t?t.testDateRaw:new Date().toISOString().slice(0,10);
+  if(t&&t.questions&&t.questions.length) t.questions.forEach(q=>addQuestion(q.label,q.type,q.maxPoints));
+  else {addQuestion('Vraag 1','Inzichtvraag',10);addQuestion('Vraag 2','Kennisvraag',5)}
+  renderScores(t?t.results:{});
+  renderPermissionStudents(t?t.permissions:[]);
+}
+
+function addQuestion(label='',type='Inzichtvraag',max=5){
+  questions.push({id:'q_'+Date.now()+'_'+questions.length,label:label||('Vraag '+(questions.length+1)),type:type,maxPoints:Number(max)||1});
+  renderQuestions();renderScores();
+}
+function renderQuestions(){
+  document.getElementById('questionsBody').innerHTML=questions.map((q,i)=>`<tr>
+    <td><input value="${escapeHtml(q.label)}" oninput="questions[${i}].label=this.value;renderScores()"></td>
+    <td><select onchange="questions[${i}].type=this.value"><option ${q.type==='Inzichtvraag'?'selected':''}>Inzichtvraag</option><option ${q.type==='Kennisvraag'?'selected':''}>Kennisvraag</option><option ${q.type==='Toepassingsvraag'?'selected':''}>Toepassingsvraag</option><option ${q.type==='Overig'?'selected':''}>Overig</option></select></td>
+    <td><input type="number" min="1" value="${q.maxPoints}" oninput="questions[${i}].maxPoints=Number(this.value)||1;renderScores()"></td>
+    <td><button type="button" class="icon" onclick="questions.splice(${i},1);renderQuestions();renderScores()">✖</button></td>
+  </tr>`).join('');
+}
+function renderScores(existing={}){
+  const head=document.getElementById('scoreHead'),body=document.getElementById('scoreBody');
+  head.innerHTML='<tr><th>Leerling</th>'+questions.map(q=>`<th>${escapeHtml(q.label)}<br><span class="muted">max ${q.maxPoints}</span></th>`).join('')+'<th>Totaal</th></tr>';
+  body.innerHTML=classStudents.map(s=>{
+    const old=existing[s.username]||existing[s.name]||{};
+    return `<tr data-student="${escapeHtml(s.username)}"><td style="text-align:left"><b>${escapeHtml(s.name)}</b></td>`+
+      questions.map(q=>`<td><input type="number" min="0" max="${q.maxPoints}" class="score-input" data-qid="${escapeHtml(q.id)}" value="${old[q.id]!==undefined?old[q.id]:''}" style="width:65px"></td>`).join('')+
+      '<td class="row-total">0</td></tr>';
+  }).join('');
+  document.querySelectorAll('.score-input').forEach(x=>x.addEventListener('input',calcTotals));
+  calcTotals();
+}
+function calcTotals(){
+  document.querySelectorAll('#scoreBody tr').forEach(tr=>{
+    let total=0;tr.querySelectorAll('.score-input').forEach(i=>{if(i.value!=='')total+=Number(i.value)});
+    tr.querySelector('.row-total').innerText=total;
+  });
+}
+function getScores(){
+  const result={};
+  document.querySelectorAll('#scoreBody tr').forEach(tr=>{
+    const u=tr.dataset.student;result[u]={};
+    tr.querySelectorAll('.score-input').forEach(i=>result[u][i.dataset.qid]=i.value===''?'':Number(i.value));
+  });
+  return result;
+}
+function renderPermissionStudents(existing=[]){
+  const set={};(existing||[]).forEach(x=>set[String(x).toLowerCase()]=true);
+  document.getElementById('permissionStudents').innerHTML=classStudents.length?classStudents.map(s=>`
+    <label class="student-row"><input type="checkbox" class="permission-student" value="${escapeHtml(s.username)}" ${set[s.username.toLowerCase()]?'checked':''}><span>${escapeHtml(s.name)}</span></label>`).join(''):
+    '<em class="muted">Geen leerlingen in deze klas.</em>';
+}
+document.getElementById('testForm').addEventListener('submit',function(e){
+  e.preventDefault();
+  if(!questions.length){showMsg('testMsg','Voeg minimaal één vraag toe.',false);return}
+  const btn=document.getElementById('saveTestBtn');btn.disabled=true;btn.innerText='Opslaan...';
+  const permissions=[...document.querySelectorAll('.permission-student:checked')].map(x=>x.value);
+  google.script.run.withSuccessHandler(function(res){
+    btn.disabled=false;btn.innerText='Toets opslaan';
+    if(res.success){closeModal('testModal');loadTeacherTests()}else showMsg('testMsg',res.message,false);
+  }).saveTest(token,{id:document.getElementById('testId').value,selectedClass:activeClass,testName:document.getElementById('testName').value,subject:document.getElementById('testSubject').value,testDate:document.getElementById('testDate').value,questions:questions,results:getScores(),permissions:permissions});
+});
+function deleteTest(id){if(!confirm('Deze toets en de resultaten verwijderen?'))return;google.script.run.withSuccessHandler(function(res){if(res.success)loadTeacherTests();else alert(res.message)}).deleteTest(token,id)}
+
+/* ===== LEERLING ===== */
+function loadStudentDashboard(){
+  showScreen('studentDashboard');
+  google.script.run.withSuccessHandler(renderStudentHomework).getStudentHomework(token);
+  google.script.run.withSuccessHandler(renderStudentTests).getStudentTests(token);
+}
+function studentTab(id,btn){
+  document.querySelectorAll('#studentDashboard .tab').forEach(x=>x.classList.remove('active'));btn.classList.add('active');
+  document.getElementById('studentHomework').classList.remove('active');document.getElementById('studentTests').classList.remove('active');
+  document.getElementById(id).classList.add('active');
+}
+function renderStudentHomework(items){
+  const box=document.getElementById('studentHomeworkList');
+  if(!items||!items.length){box.innerHTML='<div class="info-box">Er is nog geen huiswerk aan jou toegewezen.</div>';return}
+  box.innerHTML=items.map(x=>`<div class="item"><div class="item-head"><div><b>📘 ${escapeHtml(x.vak)}</b><br>${escapeHtml(x.omschrijving)}<br><span class="muted">Docent: ${escapeHtml(x.docent)} · Klas: ${escapeHtml(x.klas)} · Inleveren: ${escapeHtml(x.inleverdatum)}</span></div><span class="status ${x.status==='Af'?'done':'todo'}">${x.status==='Af'?'✔ Af':'⏳ Nog niet af'}</span></div></div>`).join('');
+}
+function renderStudentTests(items){
+  const box=document.getElementById('studentTestsList');
+  items=items||[];
+  if(!items.length){box.innerHTML='<div class="info-box">Er zijn nog geen toetscijfers beschikbaar.</div>';return}
+  box.innerHTML=items.map((t,i)=>{
+    currentTests[t.id]=t;
+    const score=t.max>0?`${t.total} / ${t.max} punten (${t.percentage}%)`:'Nog geen score';
+    const grade=t.grade===null?'—':t.grade.toFixed(1);
+    return `<div class="item"><div class="item-head"><div><b style="color:#8e24aa">📝 ${escapeHtml(t.testName)}</b><br>${escapeHtml(t.subject)} · ${escapeHtml(t.testDate)}<br><span class="muted">Docent: ${escapeHtml(t.docent)} · Klas: ${escapeHtml(t.klas)}</span></div><div style="text-align:right"><b style="font-size:18px">${grade}</b><br><span class="muted">${score}</span>${t.canViewTest?`<br><button type="button" class="icon" style="margin-top:6px" data-student-test="${i}">👁 Toets bekijken</button>`:'<br><span class="muted">Toets niet vrijgegeven</span>'}</div></div></div>`;
+  }).join('');
+  box.querySelectorAll('[data-student-test]').forEach(btn=>btn.addEventListener('click',()=>viewStudentTest(items[Number(btn.dataset.studentTest)].id)));
+}
+function viewStudentTest(id){
+  document.getElementById('viewTestContent').innerHTML='Laden...';document.getElementById('viewTestModal').classList.add('active');
+  google.script.run.withSuccessHandler(function(res){
+    if(!res.success){document.getElementById('viewTestContent').innerHTML='<div class="msg error" style="display:block">'+escapeHtml(res.message)+'</div>';return}
+    document.getElementById('viewTestTitle').innerText='📝 '+res.testName+' — '+res.subject;
+    const s=res.score;
+    document.getElementById('viewTestContent').innerHTML=`<div class="info-box">Datum: ${escapeHtml(res.testDate)} · Score: <b>${s.total}/${s.max}</b> (${s.percentage}%) · Cijfer: <b>${s.grade===null?'—':s.grade.toFixed(1)}</b></div>
+      <table><thead><tr><th>Vraag</th><th>Type</th><th>Max punten</th></tr></thead><tbody>${(res.questions||[]).map(q=>`<tr><td>${escapeHtml(q.label)}</td><td>${escapeHtml(q.type)}</td><td>${q.maxPoints}</td></tr>`).join('')}</tbody></table>`;
+  }).getStudentTestDetails(token,id);
+}
+
+function escapeHtml(s){
+  return String(s==null?'':s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#039;');
+}
+</script>
+</body>
+</html>
